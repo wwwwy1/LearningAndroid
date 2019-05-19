@@ -21,8 +21,11 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mPrevButton;
     private boolean mIsCheater;
 
+
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String KEY_INDEX1 = "index1";
+    private static final String KEY_INDEX2 = "index2";
     private static final String EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.android.geoquiz.answer_is_true";
     private static final int REQUEST_CODE_CHEAT=0;
     private TextView mQuestionTextView;
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
             new Question(R.string.question_three,false),
     };
     private int mCurrentIndex=0;
-
+    private boolean[] mCheats=new boolean[mQuestionBank.length];
     public static Intent newIntent(Context packageContext,boolean answerIsTrue){
         Intent intent=new Intent(packageContext,CheatActivity.class);
         intent.putExtra(EXTRA_ANSWER_IS_TRUE,answerIsTrue);
@@ -49,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState!=null){
             mCurrentIndex=savedInstanceState.getInt(KEY_INDEX,0);
+            mIsCheater=savedInstanceState.getBoolean(KEY_INDEX1,false);
+            mCheats=savedInstanceState.getBooleanArray(KEY_INDEX2);
         }
         mQuestionTextView=findViewById(R.id.question_text_view);
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
@@ -124,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             mIsCheater=CheatActivity.wasAnswerShown(data);
+            mCheats[mCurrentIndex]=mIsCheater;
         }
     }
     private void updateuestion(){
@@ -134,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
     private void checkAnswer(boolean userPressedTrue){
         boolean answerIsTrue=mQuestionBank[mCurrentIndex].ismAnswerTrue();
         int messageResId=0;
-        if (mIsCheater){
+        if (mCheats[mCurrentIndex]){
             messageResId=R.string.judgment_toast;
         }else {
             if (userPressedTrue==answerIsTrue){
@@ -189,5 +195,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         Log.i(TAG,"onSaveInstanceState");
         outState.putInt(KEY_INDEX,mCurrentIndex);
+        outState.putBoolean(KEY_INDEX1,mIsCheater);
+        outState.putBooleanArray(KEY_INDEX2,mCheats);
     }
 }
