@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,16 +18,19 @@ public class MainActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mCheatButton;
+    private Button mShowButton;
     private ImageButton mNextButton;
     private ImageButton mPrevButton;
     private boolean mIsCheater;
-
+    private TextView mShowText;
+    private int mCheatNum=0;
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
     private static final String KEY_INDEX1 = "index1";
     private static final String KEY_INDEX2 = "index2";
     private static final String EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.android.geoquiz.answer_is_true";
+    private static final String EXTRA_ANSWER_IS_NUM = "com.bignerdranch.android.geoquiz.answer_is_num";
     private static final int REQUEST_CODE_CHEAT=0;
     private TextView mQuestionTextView;
     private int mTrueNum=0;
@@ -37,9 +41,10 @@ public class MainActivity extends AppCompatActivity {
     };
     private int mCurrentIndex=0;
     private boolean[] mCheats=new boolean[mQuestionBank.length];
-    public static Intent newIntent(Context packageContext,boolean answerIsTrue){
+    public static Intent newIntent(Context packageContext,boolean answerIsTrue,int num){
         Intent intent=new Intent(packageContext,CheatActivity.class);
         intent.putExtra(EXTRA_ANSWER_IS_TRUE,answerIsTrue);
+        intent.putExtra(EXTRA_ANSWER_IS_NUM,num);
         return intent;
     }
 
@@ -114,7 +119,18 @@ public class MainActivity extends AppCompatActivity {
         mCheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(newIntent(MainActivity.this,mQuestionBank[mCurrentIndex].ismAnswerTrue()),REQUEST_CODE_CHEAT);
+                startActivityForResult(newIntent(MainActivity.this,mQuestionBank[mCurrentIndex].ismAnswerTrue(),mCheatNum),REQUEST_CODE_CHEAT);
+            }
+        });
+
+        mShowButton=(Button)findViewById(R.id.show_button);
+        mShowText=(TextView)findViewById(R.id.show_text);
+        mShowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CharSequence cs;
+                cs="当前api级别为："+ Build.VERSION.SDK_INT;
+                mShowText.setText(cs);
             }
         });
         updateuestion();
@@ -129,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             mIsCheater=CheatActivity.wasAnswerShown(data);
+            mCheatNum=CheatActivity.wasAnswerNum(data);
             mCheats[mCurrentIndex]=mIsCheater;
         }
     }
